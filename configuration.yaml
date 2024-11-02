@@ -22,9 +22,10 @@ wago:
         address_ang: 13200
         scan_interval: 5
       - name: westen
-        address_set: 12356
+        address_set: 12357
         address_p: 13208
         address_a: 13216
         address_pos: 13224
         address_ang: 13232
         scan_interval: 5
+

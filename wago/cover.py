@@ -15,7 +15,12 @@ from homeassistant.const import (
 )
 
 from homeassistant.core import HomeAssistant
-from homeassistant.components.cover import CoverEntity, CoverEntityFeature, ATTR_POSITION, ATTR_TILT_POSITION
+from homeassistant.components.cover import (
+    CoverEntity,
+    CoverEntityFeature,
+    ATTR_POSITION,
+    ATTR_TILT_POSITION,
+)
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -56,9 +61,18 @@ async def async_setup_platform(
 
 
 class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
-    _attr_supported_features = CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE | CoverEntityFeature.SET_POSITION | CoverEntityFeature.OPEN_TILT | CoverEntityFeature.CLOSE_TILT | CoverEntityFeature.SET_TILT_POSITION
+    _attr_supported_features = (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.SET_POSITION
+        | CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
 
-    def __init__(self, haas: HomeAssistant, hub: WagoHub, config: dict[str, Any]) -> None:
+    def __init__(
+        self, haas: HomeAssistant, hub: WagoHub, config: dict[str, Any]
+    ) -> None:
         super().__init__(haas, hub, config)
 
         self._address_set = int(config[CONF_ADRESS_SET])
@@ -96,20 +110,24 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
     async def _set_position(self, pos: int, ang: int) -> bool:
         if pos < 0:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}")
+                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}"
+            )
             pos = 0
         if pos > 100:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}")
+                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}"
+            )
             pos = 100
 
         if ang < 0:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}")
+                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}"
+            )
             ang = 0
         if ang > 100:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}")
+                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}"
+            )
             ang = 100
 
         # _LOGGER.debug(f"Set Position: pos: {pos} ang: {ang}")
@@ -135,7 +153,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
 
         await asyncio.sleep(0.2)
 
-        ret = await self._hub.async_write_bool(self._address_set, True)
+        ret = await self._hub.async_write_bool(self._address_set, False)
         if not ret:
             return False
 
@@ -149,7 +167,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         current_pos = await self._get_position()
         if current_pos is None:
             return False
-        
+
         if current_pos > pos:
             self._attr_is_closing = True
             self._attr_is_opening = False
@@ -167,9 +185,9 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
                     current_ang = await self._get_angle()
                     if current_ang is None:
                         return False
-                    
-                    self._attr_current_cover_position = current_pos
-                    self._attr_current_cover_tilt_position = current_ang
+
+                    # self._attr_current_cover_position = current_pos
+                    # self._attr_current_cover_tilt_position = current_ang
 
                     delta_pos = abs(pos - current_pos)
                     delta_ang = abs(ang - current_ang)
@@ -177,7 +195,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
                     if delta_pos <= self._err_pos and delta_ang <= self._err_ang:
                         break
 
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(1)
 
         except asyncio.TimeoutError as e:
             _LOGGER.warning(f"{self.name} Timedout while waiting for jal to reach target: pos: {
