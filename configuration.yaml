@@ -1,0 +1,30 @@
+logger:
+  default: warning
+  logs:
+    custom_components.wago: info
+
+modbus:
+  - name: modbus_hub
+    type: tcp
+    host: 192.168.2.49
+    port: 502
+    binary_sensors:
+      - name: Kalt
+        address: 12308
+wago:
+  - name: wago_1
+    covers:
+      - name: sueden
+        address_set: 12356
+        address_p: 13176
+        address_a: 13184
+        address_pos: 13192
+        address_ang: 13200
+        scan_interval: 5
+      - name: westen
+        address_set: 12356
+        address_p: 13208
+        address_a: 13216
+        address_pos: 13224
+        address_ang: 13232
+        scan_interval: 5

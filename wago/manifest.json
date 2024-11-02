@@ -1,0 +1,11 @@
+{
+  "domain": "wago",
+  "name": "WAGO",
+  "codeowners": [],
+  "dependencies": ["modbus"],
+  "documentation": "",
+  "iot_class": "local_polling",
+  "loggers": ["pymodbus"],
+  "requirements": ["pymodbus==3.6.9"],
+  "version": "0.0.1"
+}

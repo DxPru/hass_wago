@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "core.restore_state",
+  "data": [
+    {
+      "state": {"entity_id":"person.dev","state":"unknown","attributes":{"editable":true,"id":"dev","device_trackers":[],"user_id":"75c50bde9fab47309e97b4d4bbe5f974","friendly_name":"dev"},"last_changed":"2024-11-02T10:43:47.121089+00:00","last_reported":"2024-11-02T10:43:48.120911+00:00","last_updated":"2024-11-02T10:43:48.120911+00:00","context":{"id":"01JBP7JNRR4C9NEVYA2EBTZS8M","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"conversation.home_assistant","state":"unknown","attributes":{"friendly_name":"Home Assistant","supported_features":1},"last_changed":"2024-11-02T10:43:47.729134+00:00","last_reported":"2024-11-02T10:43:47.729134+00:00","last_updated":"2024-11-02T10:43:47.729134+00:00","context":{"id":"01JBP7JNCHYV3JD3JEQK2MG0J4","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"binary_sensor.kalt","state":"unavailable","attributes":{"friendly_name":"Kalt"},"last_changed":"2024-11-02T10:44:43.662862+00:00","last_reported":"2024-11-02T10:44:43.662862+00:00","last_updated":"2024-11-02T10:44:43.662862+00:00","context":{"id":"01JBP7MC0EHR4XWBGSMY7HWRDS","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"tts.google_translate_en_com","state":"unknown","attributes":{"friendly_name":"Google Translate en com"},"last_changed":"2024-11-02T10:43:47.962111+00:00","last_reported":"2024-11-02T10:43:47.962111+00:00","last_updated":"2024-11-02T10:43:47.962111+00:00","context":{"id":"01JBP7JNKTE2KKRRK2Q78AJ4WK","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"cover.sueden","state":"unavailable","attributes":{"friendly_name":"sueden","supported_features":183},"last_changed":"2024-11-02T10:44:43.663293+00:00","last_reported":"2024-11-02T10:44:43.663293+00:00","last_updated":"2024-11-02T10:44:43.663293+00:00","context":{"id":"01JBP7MC0FSWMGV0988WY4RWZJ","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"cover.westen","state":"unavailable","attributes":{"friendly_name":"westen","supported_features":183},"last_changed":"2024-11-02T10:44:43.663351+00:00","last_reported":"2024-11-02T10:44:43.663351+00:00","last_updated":"2024-11-02T10:44:43.663351+00:00","context":{"id":"01JBP7MC0FRN290SXH7KR7F3C0","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"button.shellyplug_2f55a3_reboot","state":"unknown","attributes":{"device_class":"restart","friendly_name":"shellyplug-2F55A3 Reboot"},"last_changed":"2024-11-02T10:43:48.070878+00:00","last_reported":"2024-11-02T10:43:48.070878+00:00","last_updated":"2024-11-02T10:43:48.070878+00:00","context":{"id":"01JBP7JNQ64JM7ENS5GZPDX4FT","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"button.key_light_air_identify","state":"unknown","attributes":{"device_class":"identify","friendly_name":"key light air Identify"},"last_changed":"2024-11-02T10:43:48.120080+00:00","last_reported":"2024-11-02T10:43:48.120080+00:00","last_updated":"2024-11-02T10:43:48.120080+00:00","context":{"id":"01JBP7JNRRV0TMCB9WV066RRKZ","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    },
+    {
+      "state": {"entity_id":"button.key_light_air_restart","state":"unknown","attributes":{"device_class":"restart","friendly_name":"key light air Restart"},"last_changed":"2024-11-02T10:43:48.120156+00:00","last_reported":"2024-11-02T10:43:48.120156+00:00","last_updated":"2024-11-02T10:43:48.120156+00:00","context":{"id":"01JBP7JNRR4ZZ5PYYGTX3YVF5A","parent_id":null,"user_id":null}},
+      "extra_data": null,
+      "last_seen": "2024-11-02T10:44:43.663539+00:00"
+    }
+  ]
+}
