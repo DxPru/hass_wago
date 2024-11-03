@@ -14,12 +14,12 @@ from homeassistant.components.switch import (
 
 from homeassistant.components.modbus.const import MODBUS_DOMAIN
 from homeassistant.const import (
+    CONF_LIGHTS,
     CONF_NAME,
     CONF_SCAN_INTERVAL,
     CONF_UNIQUE_ID,
     CONF_COVERS,
     DEVICE_DEFAULT_NAME,
-    Platform,
 )
 
 from homeassistant.core import HomeAssistant
@@ -30,11 +30,12 @@ from .const import (
     WAGO_DOMAIN as DOMAIN,
     CONF_HUB,
     CONF_DEVICE_CLASS,
-    CONF_ADRESS_SET,
-    CONF_ADRESS_A,
-    CONF_ADRESS_P,
-    CONF_ADRESS_ANG,
-    CONF_ADRESS_POS,
+    CONF_ADDRESS_SET,
+    CONF_ADDRESS_A,
+    CONF_ADDRESS_P,
+    CONF_ADDRESS_ANG,
+    CONF_ADDRESS_POS,
+    CONF_ADDRESS_BRIGHTNESS,
     CONF_ERR_POS,
     CONF_ERR_ANG,
     CONF_TIMEOUT,
@@ -50,34 +51,34 @@ from .wago import WagoHub, async_wago_setup
 _LOGGER = logging.getLogger(__name__)
 
 
-
 BASE_COMPONENT_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
         vol.Optional(
             CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
         ): cv.positive_int,
-        vol.Optional(
-            CONF_TIMEOUT, default=DEFAULT_TIMEOUT
-        ): cv.positive_timedelta,
+        vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_timedelta,
         vol.Optional(CONF_UNIQUE_ID): cv.string,
     }
 )
 
 COVERS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
     {
-        vol.Required(CONF_ADRESS_SET): cv.positive_int,
-        vol.Required(CONF_ADRESS_A): cv.positive_int,
-        vol.Required(CONF_ADRESS_P): cv.positive_int,
-        vol.Required(CONF_ADRESS_ANG): cv.positive_int,
-        vol.Required(CONF_ADRESS_POS): cv.positive_int,
-        vol.Optional(
-            CONF_ERR_POS, default=DEFAULT_ERR_POS
-        ): cv.positive_int,
-        vol.Optional(
-            CONF_ERR_ANG, default=DEFAULT_ERR_ANG
-        ): cv.positive_int,
+        vol.Required(CONF_ADDRESS_SET): cv.positive_int,
+        vol.Required(CONF_ADDRESS_A): cv.positive_int,
+        vol.Required(CONF_ADDRESS_P): cv.positive_int,
+        vol.Required(CONF_ADDRESS_ANG): cv.positive_int,
+        vol.Required(CONF_ADDRESS_POS): cv.positive_int,
+        vol.Optional(CONF_ERR_POS, default=DEFAULT_ERR_POS): cv.positive_int,
+        vol.Optional(CONF_ERR_ANG, default=DEFAULT_ERR_ANG): cv.positive_int,
         vol.Optional(CONF_DEVICE_CLASS): COVER_DEVICE_CLASSES_SCHEMA,
+    }
+)
+
+LIGHTS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
+    {
+        vol.Required(CONF_ADDRESS_SET): cv.positive_int,
+        vol.Optional(CONF_ADDRESS_BRIGHTNESS): cv.positive_int,
     }
 )
 
@@ -87,9 +88,10 @@ CONFIG_SCHEMA = vol.Schema(
             cv.ensure_list,
             [
                 {
-                vol.Optional(CONF_NAME, default=DEVICE_DEFAULT_NAME): cv.string,
-                vol.Optional(CONF_HUB, default=DEFAULT_HUB): cv.string,
-                vol.Optional(CONF_COVERS): vol.All(cv.ensure_list, [COVERS_SCHEMA]),
+                    vol.Optional(CONF_NAME, default=DEVICE_DEFAULT_NAME): cv.string,
+                    vol.Optional(CONF_HUB, default=DEFAULT_HUB): cv.string,
+                    vol.Optional(CONF_COVERS): vol.All(cv.ensure_list, [COVERS_SCHEMA]),
+                    vol.Optional(CONF_LIGHTS): vol.All(cv.ensure_list, [LIGHTS_SCHEMA]),
                 },
             ],
         )

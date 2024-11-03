@@ -29,14 +29,13 @@ from . import get_hub
 from .wago import WagoHub
 from .entity import BasePlatform
 from .const import (
-    CONF_ADRESS_SET,
-    CONF_ADRESS_A,
-    CONF_ADRESS_P,
-    CONF_ADRESS_ANG,
-    CONF_ADRESS_POS,
+    CONF_ADDRESS_SET,
+    CONF_ADDRESS_A,
+    CONF_ADDRESS_P,
+    CONF_ADDRESS_ANG,
+    CONF_ADDRESS_POS,
     CONF_ERR_POS,
     CONF_ERR_ANG,
-    CONF_TIMEOUT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,11 +74,11 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
     ) -> None:
         super().__init__(haas, hub, config)
 
-        self._address_set = int(config[CONF_ADRESS_SET])
-        self._address_a = int(config[CONF_ADRESS_A])
-        self._address_p = int(config[CONF_ADRESS_P])
-        self._address_ang = int(config[CONF_ADRESS_ANG])
-        self._address_pos = int(config[CONF_ADRESS_POS])
+        self._address_set = int(config[CONF_ADDRESS_SET])
+        self._address_a = int(config[CONF_ADDRESS_A])
+        self._address_p = int(config[CONF_ADDRESS_P])
+        self._address_ang = int(config[CONF_ADDRESS_ANG])
+        self._address_pos = int(config[CONF_ADDRESS_POS])
 
         self._err_pos = int(config[CONF_ERR_POS])
         self._err_ang = int(config[CONF_ERR_ANG])
@@ -186,8 +185,10 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
                     if current_ang is None:
                         return False
 
-                    # self._attr_current_cover_position = current_pos
-                    # self._attr_current_cover_tilt_position = current_ang
+                    self._attr_current_cover_position = current_pos
+                    self._attr_current_cover_tilt_position = current_ang
+
+                    self.async_write_ha_state()
 
                     delta_pos = abs(pos - current_pos)
                     delta_ang = abs(ang - current_ang)
@@ -210,27 +211,20 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
     async def _get_position(self) -> int | None:
         pos = await self._hub.async_read_u8(self._address_pos)
 
-        if pos < 0:
-            pos = 0
-        if pos > 100:
-            pos = 100
+        if pos is None:
+            return None
 
-        # _LOGGER.debug(f"Get Position: pos: {pos}")
-
-        return pos
+        return min(max(pos, 0), 100)
 
     async def _get_angle(self) -> int | None:
         ang = await self._hub.async_read_u8(self._address_ang)
 
+        if ang is None:
+            return None
+
         ang = int(ang * 1.125 / 180 * 100)
-        if ang < 0:
-            ang = 0
-        if ang > 100:
-            ang = 100
 
-        # _LOGGER.debug(f"Get Angle: ang: {ang}")
-
-        return ang
+        return min(max(ang, 0), 100)
 
     async def async_open_cover(self, **kwargs: Any) -> None:
         """Open cover."""

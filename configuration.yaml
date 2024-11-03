@@ -28,4 +28,8 @@ wago:
         address_pos: 13224
         address_ang: 13232
         scan_interval: 5
+    lights:
+      - name: dominik
+        address_set: 12354
+        address_brightness: 13168
 
