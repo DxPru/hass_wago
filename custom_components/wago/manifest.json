@@ -1,11 +1,20 @@
 {
   "domain": "wago",
   "name": "WAGO",
-  "codeowners": [],
-  "dependencies": ["modbus"],
-  "documentation": "",
+  "codeowners": [
+    "DxPru"
+  ],
+  "dependencies": [
+    "modbus"
+  ],
+  "documentation": "https://github.com/DxPru/hass_wago",
+  "issue_tracker": "https://github.com/DxPru/hass_wago/issues",
   "iot_class": "local_polling",
-  "loggers": ["pymodbus"],
-  "requirements": ["pymodbus==3.6.9"],
+  "loggers": [
+    "pymodbus"
+  ],
+  "requirements": [
+    "pymodbus==3.6.9"
+  ],
   "version": "0.0.1"
 }
