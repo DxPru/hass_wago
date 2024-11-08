@@ -4,7 +4,7 @@ services:
     image: "ghcr.io/home-assistant/home-assistant:stable"
     volumes:
       - ./config:/config
-      - ./wago:/config/custom_components/wago
+      - ./custom_components:/config/custom_components
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     restart: unless-stopped
