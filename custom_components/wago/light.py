@@ -115,10 +115,12 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             )
             return None
 
-        brightness = await self._hub.async_read_u8(self._address_val)
+        brightness = await self._hub.async_read_register(self._address_val)
 
         if brightness is None:
             return None
+        
+        brightness = int(brightness * 255.0 / 2**15)
 
         return min(max(brightness, 0), 255)
     

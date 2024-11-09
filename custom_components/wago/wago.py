@@ -22,6 +22,7 @@ from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_COILS,
     CALL_TYPE_WRITE_COIL,
     CALL_TYPE_COIL,
+    CALL_TYPE_REGISTER_HOLDING,
 )
 
 
@@ -119,7 +120,7 @@ class WagoHub:
         result = await self._modbus_hub.async_pb_call(None, addr, count, CALL_TYPE_COIL)
 
         if result is None or result.isError():
-            error = f"Error: Write at address: {addr} count: {count} -> 'No Exception'"
+            error = f"Error: Read at address: {addr} count: {count} -> 'No Exception'"
             self._log_error(error)
             return None
 
@@ -140,6 +141,21 @@ class WagoHub:
             return None
 
         return pack_bitstring(result)
+    
+    async def async_read_register(self, addr: int) -> int | None:
+        if self._modbus_hub is None:
+            error = "Tried to read with no Modbus Hub Connection!"
+            self._log_error(error)
+            return None
+
+        result = await self._modbus_hub.async_pb_call(None, addr, 1, CALL_TYPE_REGISTER_HOLDING)
+
+        if result is None or result.isError():
+            error = f"Error: ReadHolding at address: {addr} -> 'No Exception'"
+            self._log_error(error)
+            return None
+
+        return result.registers[0]
 
     async def async_read_f32(self, addr: int) -> float | None:
         data = await self.async_read(addr, 32)
