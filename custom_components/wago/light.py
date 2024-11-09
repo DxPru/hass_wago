@@ -129,6 +129,10 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
         if state is None:
             return False
         
+        _LOGGER.debug(
+                f"Toggled: state: {state} -> {on}"
+            )
+
         if state == on:
             # Light already at desired state
             return True
@@ -202,5 +206,9 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
                 return
             self._attr_available = True
             self._attr_is_on = state
+
+            _LOGGER.debug(
+                f"Updated: on: {self._attr_is_on}"
+            )
 
         self.async_write_ha_state()
