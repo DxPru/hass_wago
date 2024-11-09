@@ -19,7 +19,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import get_hub
-from .const import CONF_ADDRESS_BRIGHTNESS, CONF_ADDRESS_SET
+from .const import CONF_ADDRESS_BRIGHTNESS, CONF_ADDRESS_SET, CONF_ADDRESS_VAL
 from .entity import BasePlatform
 from .wago import WagoHub
 
@@ -51,6 +51,8 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
         super().__init__(hass, hub, config)
 
         self._address_set = int(config[CONF_ADDRESS_SET])
+        self._address_val = int(config[CONF_ADDRESS_VAL])
+
         if CONF_ADDRESS_BRIGHTNESS in config:
             self._address_brightness = int(config[CONF_ADDRESS_BRIGHTNESS])
             self._attr_color_mode = ColorMode.BRIGHTNESS
@@ -113,12 +115,35 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             )
             return None
 
-        brightness = await self._hub.async_read_u8(self._address_brightness)
+        brightness = await self._hub.async_read_u8(self._address_val)
 
         if brightness is None:
             return None
 
         return min(max(brightness, 0), 255)
+    
+    async def _toggle(self, on: bool) -> bool:
+        state = await self._hub.async_read_bool(self._address_val)
+        if state is None:
+            return False
+        
+        if state == on:
+            # Light already at desired state
+            return True
+        
+        # toggle
+        ret = await self._hub.async_write_bool(self._address_set, True)
+        if not ret:
+            return False
+
+        await asyncio.sleep(0.2)
+
+        ret = await self._hub.async_write_bool(self._address_set, False)
+        if not ret:
+            return False
+
+        return True
+
 
     async def async_turn_on(self, **kwargs: Any):
         """Set light on."""
@@ -131,7 +156,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             result = await self._set_brightness(brightness)
             self._attr_available = result is None
         else:
-            result = await self._hub.async_write_bool(self._address_set, True)
+            result = self._toggle(True)
             self._attr_available = result is None
 
         await self.async_update()
@@ -141,7 +166,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             result = await self._set_brightness(0)
             self._attr_available = result is None
         else:
-            result = await self._hub.async_write_bool(self._address_set, False)
+            result = self._toggle(False)
             self._attr_available = result is None
 
         await self.async_update()
@@ -168,7 +193,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
                 f"Updated: on: {self._attr_is_on}, brightness: {self._attr_brightness}"
             )
         else:
-            state = await self._hub.async_read_bool(self._address_set)
+            state = await self._hub.async_read_bool(self._address_val)
             if state is None:
                 self._attr_available = False
                 self.async_write_ha_state()
