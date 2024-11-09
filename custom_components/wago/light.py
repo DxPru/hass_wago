@@ -162,7 +162,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             result = await self._set_brightness(brightness)
             self._attr_available = result is None
         else:
-            result = self._toggle(True)
+            result = await self._toggle(True)
             self._attr_available = result is None
 
         await self.async_update()
@@ -172,7 +172,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             result = await self._set_brightness(0)
             self._attr_available = result is None
         else:
-            result = self._toggle(False)
+            result = await self._toggle(False)
             self._attr_available = result is None
 
         await self.async_update()
