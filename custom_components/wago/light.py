@@ -119,24 +119,24 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
 
         if brightness is None:
             return None
-        
-        brightness = int(brightness * 255.0 / 2**15)
+
+        brightness &= ~(1 << 15)
+
+        brightness = int(brightness * 255.0 / (2**15 - 1))
 
         return min(max(brightness, 0), 255)
-    
+
     async def _toggle(self, on: bool) -> bool:
         state = await self._hub.async_read_bool(self._address_val)
         if state is None:
             return False
-        
-        _LOGGER.debug(
-                f"Toggled: state: {state} -> {on}"
-            )
+
+        _LOGGER.debug(f"Toggled: state: {state} -> {on}")
 
         if state == on:
             # Light already at desired state
             return True
-        
+
         # toggle
         ret = await self._hub.async_write_bool(self._address_set, True)
         if not ret:
@@ -149,7 +149,6 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             return False
 
         return True
-
 
     async def async_turn_on(self, **kwargs: Any):
         """Set light on."""
@@ -207,8 +206,6 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             self._attr_available = True
             self._attr_is_on = state
 
-            _LOGGER.debug(
-                f"Updated: on: {self._attr_is_on}"
-            )
+            _LOGGER.debug(f"Updated: on: {self._attr_is_on}")
 
         self.async_write_ha_state()
