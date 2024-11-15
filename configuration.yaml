@@ -31,6 +31,7 @@ wago:
     lights:
       - name: dominik
         address_set: 12354
+        address_rst: 12355
         address_val: 584
         address_brightness: 13168
 

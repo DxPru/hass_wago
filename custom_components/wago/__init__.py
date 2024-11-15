@@ -31,6 +31,7 @@ from .const import (
     CONF_HUB,
     CONF_DEVICE_CLASS,
     CONF_ADDRESS_SET,
+    CONF_ADDRESS_RST,
     CONF_ADDRESS_VAL,
     CONF_ADDRESS_A,
     CONF_ADDRESS_P,
@@ -79,6 +80,7 @@ COVERS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
 LIGHTS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
     {
         vol.Required(CONF_ADDRESS_SET): cv.positive_int,
+        vol.Required(CONF_ADDRESS_RST): cv.positive_int,
         vol.Required(CONF_ADDRESS_VAL): cv.positive_int,
         vol.Optional(CONF_ADDRESS_BRIGHTNESS): cv.positive_int,
     }

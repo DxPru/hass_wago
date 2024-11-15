@@ -19,7 +19,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import get_hub
-from .const import CONF_ADDRESS_BRIGHTNESS, CONF_ADDRESS_SET, CONF_ADDRESS_VAL
+from .const import CONF_ADDRESS_BRIGHTNESS, CONF_ADDRESS_SET, CONF_ADDRESS_RST, CONF_ADDRESS_VAL
 from .entity import BasePlatform
 from .wago import WagoHub
 
@@ -51,6 +51,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
         super().__init__(hass, hub, config)
 
         self._address_set = int(config[CONF_ADDRESS_SET])
+        self._address_rst = int(config[CONF_ADDRESS_RST])
         self._address_val = int(config[CONF_ADDRESS_VAL])
 
         if CONF_ADDRESS_BRIGHTNESS in config:
@@ -73,27 +74,24 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             elif state == STATE_OFF:
                 self._attr_is_on = False
 
-    async def _set_brightness(self, brightness: int) -> bool:
-        if not brightness_supported(self._attr_supported_color_modes):
-            _LOGGER.warning(
-                f"WagoLight: {self.name}: tried to set brightness on light without brightness support!"
-            )
-            return False
+    async def _set_brightness(self, brightness: int = 255) -> bool:
+        if brightness_supported(self._attr_supported_color_modes):
+            if brightness < 0:
+                _LOGGER.warning(
+                    f"WagoLight: {self.name}: tried to set brightness out of range! brightness: {
+                        brightness}"
+                )
+                brightness = 0
+            if brightness > 255:
+                _LOGGER.warning(
+                    f"WagoLight: {self.name}: tried to set brightness out of range! brightness: {
+                        brightness}"
+                )
+                brightness = 255
 
-        if brightness < 0:
-            _LOGGER.warning(
-                f"WagoLight: {self.name}: tried to set brightness out of range! brightness: {brightness}"
-            )
-            brightness = 0
-        if brightness > 255:
-            _LOGGER.warning(
-                f"WagoLight: {self.name}: tried to set brightness out of range! brightness: {brightness}"
-            )
-            brightness = 255
-
-        ret = await self._hub.async_write_u8(self._address_brightness, brightness)
-        if not ret:
-            return False
+            ret = await self._hub.async_write_u8(self._address_brightness, brightness)
+            if not ret:
+                return False
 
         # Toggle Set
         ret = await self._hub.async_write_bool(self._address_set, True)
@@ -107,11 +105,26 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             return False
 
         return True
+    
+    async def _set_off(self) -> bool:
+        # Toggle RST
+        ret = await self._hub.async_write_bool(self._address_rst, True)
+        if not ret:
+            return False
+
+        await asyncio.sleep(0.2)
+
+        ret = await self._hub.async_write_bool(self._address_rst, False)
+        if not ret:
+            return False
+
+        return True
 
     async def _get_brightness(self) -> int | None:
         if not brightness_supported(self._attr_supported_color_modes):
             _LOGGER.warning(
-                f"WagoLight: {self.name}: tried to get brightness on light without brightness support!"
+                f"WagoLight: {
+                    self.name}: tried to get brightness on light without brightness support!"
             )
             return None
 
@@ -126,53 +139,38 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
 
         return min(max(brightness, 0), 255)
 
-    async def _toggle(self, on: bool) -> bool:
-        state = await self._hub.async_read_bool(self._address_val)
-        if state is None:
-            return False
+    async def _get_state(self) -> bool | None:
+        if brightness_supported(self._attr_supported_color_modes):
+            brightness = self._get_brightness()
 
-        _LOGGER.debug(f"Toggled: state: {state} -> {on}")
+            if brightness is None:
+                return None
 
-        if state == on:
-            # Light already at desired state
-            return True
+            return brightness != 0
 
-        # toggle
-        ret = await self._hub.async_write_bool(self._address_set, True)
-        if not ret:
-            return False
+        else:
+            state = await self._hub.async_read_bool(self._address_val)
 
-        await asyncio.sleep(0.2)
+            if state is None:
+                return None
 
-        ret = await self._hub.async_write_bool(self._address_set, False)
-        if not ret:
-            return False
-
-        return True
+            return state
 
     async def async_turn_on(self, **kwargs: Any):
         """Set light on."""
-        if brightness_supported(self._attr_supported_color_modes):
-            if self._attr_color_mode == ColorMode.BRIGHTNESS:
-                brightness = kwargs.get(ATTR_BRIGHTNESS, self._attr_brightness)
-            else:
-                brightness = 255
-
-            result = await self._set_brightness(brightness)
-            self._attr_available = result is None
+        if self._attr_color_mode == ColorMode.BRIGHTNESS:
+            brightness = kwargs.get(ATTR_BRIGHTNESS, self._attr_brightness)
         else:
-            result = await self._toggle(True)
-            self._attr_available = result is None
+            brightness = 255
+
+        result = await self._set_brightness(brightness)
+        self._attr_available = result is None
 
         await self.async_update()
 
     async def async_turn_off(self, **kwargs: Any):
-        if brightness_supported(self._attr_supported_color_modes):
-            result = await self._set_brightness(0)
-            self._attr_available = result is None
-        else:
-            result = await self._toggle(False)
-            self._attr_available = result is None
+        result = await self._set_brightness(0)
+        self._attr_available = result is None
 
         await self.async_update()
 
@@ -186,26 +184,17 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
                 self._attr_available = False
                 self.async_write_ha_state()
                 return
-            self._attr_available = True
 
             if brightness != 0:
                 self._attr_brightness = brightness
-                self._attr_is_on = True
-            else:
-                self._attr_is_on = False
 
-            _LOGGER.debug(
-                f"Updated: on: {self._attr_is_on}, brightness: {self._attr_brightness}"
-            )
-        else:
-            state = await self._hub.async_read_bool(self._address_val)
-            if state is None:
-                self._attr_available = False
-                self.async_write_ha_state()
-                return
-            self._attr_available = True
-            self._attr_is_on = state
+        state = await self._get_state()
+        if state is None:
+            self._attr_available = False
+            self.async_write_ha_state()
+            return
 
-            _LOGGER.debug(f"Updated: on: {self._attr_is_on}")
+        self._attr_is_on = state
 
+        self._attr_available = True
         self.async_write_ha_state()

@@ -15,6 +15,7 @@ CONF_DEVICE_CLASS = "device_class"
 CONF_TIMEOUT = "timeout"
 
 CONF_ADDRESS_SET = "address_set"
+CONF_ADDRESS_RST = "address_rst"
 CONF_ADDRESS_VAL = "address_val"
 
 CONF_ADDRESS_A = "address_a"
