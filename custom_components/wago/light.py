@@ -74,7 +74,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             elif state == STATE_OFF:
                 self._attr_is_on = False
 
-    async def _set_brightness(self, brightness: int = 255) -> bool:
+    async def _set_on(self, brightness: int = 255) -> bool:
         if brightness_supported(self._attr_supported_color_modes):
             if brightness < 0:
                 _LOGGER.warning(
@@ -163,13 +163,13 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
         else:
             brightness = 255
 
-        result = await self._set_brightness(brightness)
+        result = await self._set_on(brightness)
         self._attr_available = result is None
 
         await self.async_update()
 
     async def async_turn_off(self, **kwargs: Any):
-        result = await self._set_brightness(0)
+        result = await self._set_off()
         self._attr_available = result is None
 
         await self.async_update()
