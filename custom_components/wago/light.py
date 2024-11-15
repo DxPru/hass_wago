@@ -141,7 +141,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
 
     async def _get_state(self) -> int | None:
         if brightness_supported(self._attr_supported_color_modes):
-            brightness = self._get_brightness()
+            brightness = await self._get_brightness()
 
             if brightness is None:
                 return None
@@ -184,7 +184,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             self.async_write_ha_state()
             return
         
-        self._attr_is_on = int(state) > 0
+        self._attr_is_on = state > 0
 
         if brightness_supported(self._attr_supported_color_modes):
             if state != 0:

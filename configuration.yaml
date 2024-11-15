@@ -11,27 +11,39 @@ modbus:
     binary_sensors:
       - name: Kalt
         address: 12308
+        device_class: cold
+
 wago:
-  - name: wago_1
+  - name: Wago
     covers:
-      - name: sueden
+      - name: Jal Dominik Süden
         address_set: 12356
         address_p: 13176
         address_a: 13184
         address_pos: 13192
         address_ang: 13200
         scan_interval: 5
-      - name: westen
+        unique_id: jal_dominik_south
+      - name: Jal Dominik Westen
         address_set: 12357
         address_p: 13208
         address_a: 13216
         address_pos: 13224
         address_ang: 13232
         scan_interval: 5
+        unique_id: jal_dominik_west
     lights:
-      - name: dominik
+      - name: Dominik
         address_set: 12354
         address_rst: 12355
-        address_val: 584
+        address_val: 518
         address_brightness: 13168
+        scan_interval: 5
+        unique_id: light_dominik
+      - name: Werkstatt
+        address_set: 12336
+        address_rst: 12336
+        address_val: 570
+        scan_interval: 5
+        unique_id: light_werkstatt
 
