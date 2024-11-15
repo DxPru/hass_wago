@@ -139,14 +139,14 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
 
         return min(max(brightness, 0), 255)
 
-    async def _get_state(self) -> bool | None:
+    async def _get_state(self) -> int | None:
         if brightness_supported(self._attr_supported_color_modes):
             brightness = self._get_brightness()
 
             if brightness is None:
                 return None
 
-            return brightness != 0
+            return brightness
 
         else:
             state = await self._hub.async_read_bool(self._address_val)
@@ -154,7 +154,7 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
             if state is None:
                 return None
 
-            return state
+            return 255 if state else 0
 
     async def async_turn_on(self, **kwargs: Any):
         """Set light on."""
@@ -178,23 +178,17 @@ class WagoLight(BasePlatform, LightEntity, RestoreEntity):
         """Update the state of the cover."""
         # remark "now" is a dummy parameter to avoid problems with
         # async_track_time_interval
-        if brightness_supported(self._attr_supported_color_modes):
-            brightness = await self._get_brightness()
-            if brightness is None:
-                self._attr_available = False
-                self.async_write_ha_state()
-                return
-
-            if brightness != 0:
-                self._attr_brightness = brightness
-
         state = await self._get_state()
         if state is None:
             self._attr_available = False
             self.async_write_ha_state()
             return
+        
+        self._attr_is_on = (state > 0)
 
-        self._attr_is_on = state
+        if brightness_supported(self._attr_supported_color_modes):
+            if state != 0:
+                self._attr_brightness = state
 
         self._attr_available = True
         self.async_write_ha_state()
