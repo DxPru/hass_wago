@@ -32,12 +32,11 @@ from .const import (
     CONF_DEVICE_CLASS,
     CONF_ADDRESS_SET,
     CONF_ADDRESS_RST,
-    CONF_ADDRESS_VAL,
-    CONF_ADDRESS_A,
-    CONF_ADDRESS_P,
-    CONF_ADDRESS_ANG,
-    CONF_ADDRESS_POS,
+    CONF_ADDRESS_ISON,
+    CONF_ADDRESS_VALSET,
     CONF_ADDRESS_BRIGHTNESS,
+    CONF_ADDRESS_REG_PA,
+    CONF_ADDRESS_REG_POSANG,
     CONF_ERR_POS,
     CONF_ERR_ANG,
     CONF_TIMEOUT,
@@ -67,10 +66,8 @@ BASE_COMPONENT_SCHEMA = vol.Schema(
 COVERS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
     {
         vol.Required(CONF_ADDRESS_SET): cv.positive_int,
-        vol.Required(CONF_ADDRESS_A): cv.positive_int,
-        vol.Required(CONF_ADDRESS_P): cv.positive_int,
-        vol.Required(CONF_ADDRESS_ANG): cv.positive_int,
-        vol.Required(CONF_ADDRESS_POS): cv.positive_int,
+        vol.Required(CONF_ADDRESS_REG_PA): cv.positive_int,
+        vol.Required(CONF_ADDRESS_REG_POSANG): cv.positive_int,
         vol.Optional(CONF_ERR_POS, default=DEFAULT_ERR_POS): cv.positive_int,
         vol.Optional(CONF_ERR_ANG, default=DEFAULT_ERR_ANG): cv.positive_int,
         vol.Optional(CONF_DEVICE_CLASS): COVER_DEVICE_CLASSES_SCHEMA,
@@ -81,7 +78,8 @@ LIGHTS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
     {
         vol.Required(CONF_ADDRESS_SET): cv.positive_int,
         vol.Required(CONF_ADDRESS_RST): cv.positive_int,
-        vol.Required(CONF_ADDRESS_VAL): cv.positive_int,
+        vol.Required(CONF_ADDRESS_ISON): cv.positive_int,
+        vol.Optional(CONF_ADDRESS_VALSET): cv.positive_int,
         vol.Optional(CONF_ADDRESS_BRIGHTNESS): cv.positive_int,
     }
 )

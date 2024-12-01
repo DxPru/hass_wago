@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 import logging
 import asyncio
+import struct
 
 from homeassistant.const import (
     CONF_COVERS,
@@ -26,14 +27,13 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import get_hub
+from .util import percent_to_u8, u8_to_percent
 from .wago import WagoHub
 from .entity import BasePlatform
 from .const import (
     CONF_ADDRESS_SET,
-    CONF_ADDRESS_A,
-    CONF_ADDRESS_P,
-    CONF_ADDRESS_ANG,
-    CONF_ADDRESS_POS,
+    CONF_ADDRESS_REG_PA,
+    CONF_ADDRESS_REG_POSANG,
     CONF_ERR_POS,
     CONF_ERR_ANG,
 )
@@ -75,10 +75,8 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         super().__init__(haas, hub, config)
 
         self._address_set = int(config[CONF_ADDRESS_SET])
-        self._address_a = int(config[CONF_ADDRESS_A])
-        self._address_p = int(config[CONF_ADDRESS_P])
-        self._address_ang = int(config[CONF_ADDRESS_ANG])
-        self._address_pos = int(config[CONF_ADDRESS_POS])
+        self._address_soll = int(config[CONF_ADDRESS_REG_PA])
+        self._address_ist = int(config[CONF_ADDRESS_REG_POSANG])
 
         self._err_pos = int(config[CONF_ERR_POS])
         self._err_ang = int(config[CONF_ERR_ANG])
@@ -109,39 +107,41 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
     async def _set_position(self, pos: int, ang: int) -> bool:
         if pos < 0:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}"
+                f"WagoCover: {
+                    self.name}: tried to set pos out of range! pos: {pos}"
             )
             pos = 0
         if pos > 100:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set pos out of range! pos: {pos}"
+                f"WagoCover: {
+                    self.name}: tried to set pos out of range! pos: {pos}"
             )
             pos = 100
 
         if ang < 0:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}"
+                f"WagoCover: {
+                    self.name}: tried to set ang out of range! ang: {ang}"
             )
             ang = 0
         if ang > 100:
             _LOGGER.warning(
-                f"WagoCover: {self.name}: tried to set ang out of range! ang: {ang}"
+                f"WagoCover: {
+                    self.name}: tried to set ang out of range! ang: {ang}"
             )
             ang = 100
 
-        # _LOGGER.debug(f"Set Position: pos: {pos} ang: {ang}")
+        # ang *= 0.9
 
-        ang = int(ang * 0.9 / 100 * 180)
-        if ang < 0:
-            ang = 0
-        if ang > 180:
-            ang = 180
+        ang_u8 = percent_to_u8(ang)
+        pos_u8 = percent_to_u8(pos)
+
+        _LOGGER.debug(f"Set Position: pos: {pos_u8} ang: {ang_u8}")
+
+        data = struct.pack('>BB', ang_u8, pos_u8)
 
         # write to the bus
-        ret = await self._hub.async_write_u8(self._address_p, pos)
-        if not ret:
-            return False
-        ret = await self._hub.async_write_u8(self._address_a, ang)
+        ret = await self._hub.async_write_register(self._address_soll, data)
         if not ret:
             return False
 
@@ -163,8 +163,8 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         if not ret:
             return False
 
-        current_pos = await self._get_position()
-        if current_pos is None:
+        current_pos, current_ang = await self._get_position()
+        if current_pos is None or current_ang is None:
             return False
 
         if current_pos > pos:
@@ -177,12 +177,8 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         try:
             async with asyncio.timeout(self._timeout.total_seconds()):
                 while True:
-                    current_pos = await self._get_position()
-                    if current_pos is None:
-                        return False
-
-                    current_ang = await self._get_angle()
-                    if current_ang is None:
+                    current_pos, current_ang = await self._get_position()
+                    if current_pos is None or current_ang is None:
                         return False
 
                     self._attr_current_cover_position = current_pos
@@ -208,23 +204,21 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
 
         return True
 
-    async def _get_position(self) -> int | None:
-        pos = await self._hub.async_read_u8(self._address_pos)
-
-        if pos is None:
+    async def _get_position(self) -> tuple[int, int] | None:
+        data = await self._hub.async_read_register(self._address_ist)
+        if data is None:
             return None
 
-        return min(max(pos, 0), 100)
+        ang_u8, pos_u8 = struct.unpack('>BB', data)
 
-    async def _get_angle(self) -> int | None:
-        ang = await self._hub.async_read_u8(self._address_ang)
+        # ang_u8 *= 1.125
 
-        if ang is None:
-            return None
+        _LOGGER.debug(f"Get Position: pos: {pos_u8} ang: {ang_u8}")
 
-        ang = int(ang * 1.125 / 180 * 100)
+        ang = u8_to_percent(ang_u8)
+        pos = u8_to_percent(pos_u8)
 
-        return min(max(ang, 0), 100)
+        return pos, ang
 
     async def async_open_cover(self, **kwargs: Any) -> None:
         """Open cover."""
@@ -276,8 +270,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         """Update the state of the cover."""
         # remark "now" is a dummy parameter to avoid problems with
         # async_track_time_interval
-        pos = await self._get_position()
-        ang = await self._get_angle()
+        pos, ang = await self._get_position()
         if pos is None or ang is None:
             self._attr_available = False
             self.async_write_ha_state()

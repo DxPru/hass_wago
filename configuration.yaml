@@ -17,33 +17,30 @@ wago:
   - name: Wago
     covers:
       - name: Jal Dominik Süden
-        address_set: 12356
-        address_p: 13176
-        address_a: 13184
-        address_pos: 13192
-        address_ang: 13200
+        address_set: 12591
+        address_reg_pa: 12418
+        address_reg_posang: 12419
         scan_interval: 5
         unique_id: jal_dominik_south
       - name: Jal Dominik Westen
-        address_set: 12357
-        address_p: 13208
-        address_a: 13216
-        address_pos: 13224
-        address_ang: 13232
+        address_set: 12592
+        address_reg_pa: 12420
+        address_reg_posang: 12421
         scan_interval: 5
         unique_id: jal_dominik_west
     lights:
       - name: Dominik
-        address_set: 12354
-        address_rst: 12355
-        address_val: 518
-        address_brightness: 13168
+        address_set: 12550
+        address_rst: 12551
+        address_ison: 12552
+        address_valset: 13760
+        address_brightness: 13768
         scan_interval: 5
         unique_id: light_dominik
-      - name: Werkstatt
-        address_set: 12336
-        address_rst: 12336
-        address_val: 570
-        scan_interval: 5
-        unique_id: light_werkstatt
+      # - name: Werkstatt
+      #   address_set: 
+      #   address_rst: 
+      #   address_ison: 
+      #   scan_interval: 5
+      #   unique_id: light_werkstatt
 

@@ -23,6 +23,7 @@ from homeassistant.components.modbus.const import (
     CALL_TYPE_WRITE_COIL,
     CALL_TYPE_COIL,
     CALL_TYPE_REGISTER_HOLDING,
+    CALL_TYPE_WRITE_REGISTER,
 )
 
 
@@ -142,7 +143,7 @@ class WagoHub:
 
         return pack_bitstring(result)
     
-    async def async_read_register(self, addr: int) -> int | None:
+    async def async_read_register(self, addr: int) -> bytes | None:
         if self._modbus_hub is None:
             error = "Tried to read with no Modbus Hub Connection!"
             self._log_error(error)
@@ -154,8 +155,10 @@ class WagoHub:
             error = f"Error: ReadHolding at address: {addr} -> 'No Exception'"
             self._log_error(error)
             return None
+        
+        data = struct.pack('>H', result.registers[0])
 
-        return result.registers[0]
+        return data
 
     async def async_read_f32(self, addr: int) -> float | None:
         data = await self.async_read(addr, 32)
@@ -215,6 +218,25 @@ class WagoHub:
         data = unpack_bitstring(value)
 
         return await self._write(addr, data)
+    
+    async def async_write_register(self, addr: int, value: bytes) -> bool:
+        if self._modbus_hub is None:
+            error = "Tried to write with no Modbus Hub Connection!"
+            self._log_error(error)
+            return False
+
+        data, = struct.unpack('>H', value)
+
+        result = await self._modbus_hub.async_pb_call(
+            None, addr, data, CALL_TYPE_WRITE_REGISTER
+        )
+
+        if result is None or result.isError():
+            error = f"Error: Write at address: {addr} value: {value} -> 'No Exception'"
+            self._log_error(error)
+            return False
+
+        return True
 
     async def async_write_f32(self, addr: int, value: float) -> bool:
         data = struct.pack("<f", value)
@@ -222,6 +244,8 @@ class WagoHub:
         return await self.async_write(addr, data)
 
     async def async_write_u8(self, addr: int, value: int) -> bool:
+        assert(0 <= value <= 255, "async_write_u8: InputOutOfBounds")
+        
         data = struct.pack("<B", value)
 
         return await self.async_write(addr, data)

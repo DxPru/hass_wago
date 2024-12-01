@@ -16,14 +16,13 @@ CONF_TIMEOUT = "timeout"
 
 CONF_ADDRESS_SET = "address_set"
 CONF_ADDRESS_RST = "address_rst"
-CONF_ADDRESS_VAL = "address_val"
 
-CONF_ADDRESS_A = "address_a"
-CONF_ADDRESS_P = "address_p"
-CONF_ADDRESS_ANG = "address_ang"
-CONF_ADDRESS_POS = "address_pos"
+CONF_ADDRESS_ISON = "address_ison"
+CONF_ADDRESS_VALSET = "address_valset"
+CONF_ADDRESS_BRIGHTNESS = "address_brightness"
 
-CONF_ADDRESS_BRIGHTNESS= "address_brightness"
+CONF_ADDRESS_REG_PA = "address_reg_pa"
+CONF_ADDRESS_REG_POSANG = "address_reg_posang"
 
 CONF_ERR_POS = "error_position"
 CONF_ERR_ANG = "error_angle"
