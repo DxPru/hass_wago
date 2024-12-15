@@ -63,9 +63,11 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
     _attr_supported_features = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
         | CoverEntityFeature.OPEN_TILT
         | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
         | CoverEntityFeature.SET_TILT_POSITION
     )
 
@@ -232,7 +234,19 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         self._attr_available = result is not None
         await self.async_update()
 
-    async def async_set_cover_position(self, **kwargs):
+    async def async_stop_cover(self, **kwargs) -> None:
+        """Stop the cover."""
+        pos, ang = await self._get_position()
+        if pos is None or ang is None:
+            self._attr_available = False
+            await self.async_update()
+            return
+        
+        result = await self._set_position(pos, ang)
+        self._attr_available = result is not None
+        await self.async_update()
+
+    async def async_set_cover_position(self, **kwargs) -> None:
         """Move the cover to a specific position."""
         pos = int(kwargs.get(ATTR_POSITION))
         ang = self._attr_current_cover_tilt_position
@@ -241,7 +255,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         self._attr_available = result is not None
         await self.async_update()
 
-    async def async_open_cover_tilt(self, **kwargs):
+    async def async_open_cover_tilt(self, **kwargs) -> None:
         """Open the cover tilt."""
         pos = self._attr_current_cover_position
 
@@ -249,7 +263,7 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         self._attr_available = result is not None
         await self.async_update()
 
-    async def async_close_cover_tilt(self, **kwargs):
+    async def async_close_cover_tilt(self, **kwargs) -> None:
         """Close the cover tilt."""
         pos = self._attr_current_cover_position
 
@@ -257,7 +271,19 @@ class WagoCover(BasePlatform, CoverEntity, RestoreEntity):
         self._attr_available = result is not None
         await self.async_update()
 
-    async def async_set_cover_tilt_position(self, **kwargs):
+    async def async_stop_cover_tilt(self, **kwargs) -> None:
+        """Stop the cover tilt."""
+        pos, ang = await self._get_position()
+        if pos is None or ang is None:
+            self._attr_available = False
+            await self.async_update()
+            return
+        
+        result = await self._set_position(pos, ang)
+        self._attr_available = result is not None
+        await self.async_update()
+
+    async def async_set_cover_tilt_position(self, **kwargs) -> None:
         """Move the cover tilt to a specific position."""
         ang = int(kwargs.get(ATTR_TILT_POSITION))
         pos = self._attr_current_cover_position

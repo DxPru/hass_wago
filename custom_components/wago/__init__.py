@@ -44,6 +44,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_ERR_POS,
     DEFAULT_ERR_ANG,
+    DEFAULT_COVER_CLASS,
     DEFAULT_TIMEOUT,
 )
 
@@ -70,7 +71,7 @@ COVERS_SCHEMA = BASE_COMPONENT_SCHEMA.extend(
         vol.Required(CONF_ADDRESS_REG_POSANG): cv.positive_int,
         vol.Optional(CONF_ERR_POS, default=DEFAULT_ERR_POS): cv.positive_int,
         vol.Optional(CONF_ERR_ANG, default=DEFAULT_ERR_ANG): cv.positive_int,
-        vol.Optional(CONF_DEVICE_CLASS): COVER_DEVICE_CLASSES_SCHEMA,
+        vol.Optional(CONF_DEVICE_CLASS, default=DEFAULT_COVER_CLASS): COVER_DEVICE_CLASSES_SCHEMA,
     }
 )
 
